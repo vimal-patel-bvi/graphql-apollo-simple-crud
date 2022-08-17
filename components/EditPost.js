@@ -1,28 +1,17 @@
 import { useMutation } from '@apollo/client';
-import { useEffect, useRef, useState } from 'react';
-import { CREATE_A_POST, UPDATE_A_POST } from '../graph-ql/mutations';
+import { useState } from 'react';
+import { UPDATE_A_POST } from '../graph-ql/mutations';
 
 export default function EditPost({ row, updated }) {
     const [updateForm, setUpdateForm] = useState({
         title: row.title,
         body: row.body
     })
-    const [editPost, { data, loading, error }] = useMutation(UPDATE_A_POST);
-    const formRef = useRef(null);
-
-    useEffect(() => {
-        if (data) {
-            alert('Post updated successfully');
-            updateCompleted();
-        }
-        if (error) {
-            alert(`Updation error! ${error.message}`);
-        }
-    }, [data, error])
-
+    const [editPost, { loading }] = useMutation(UPDATE_A_POST);
     if (loading) return 'Updating...';
 
     const updateCompleted = () => {
+        alert('Post updated successfully');
         setUpdateForm({
             title: "",
             body: ""
@@ -33,7 +22,6 @@ export default function EditPost({ row, updated }) {
     return (
         <div>
             <form
-                ref={formRef}
                 id='create-form'
                 onSubmit={e => {
                     e.preventDefault();
@@ -42,6 +30,10 @@ export default function EditPost({ row, updated }) {
                             "id": row.id,
                             input: updateForm
                         }
+                    }).then(() => {
+                        updateCompleted();
+                    }).catch((error) => {
+                        alert(`Updation error! ${error.message}`);
                     });
                 }}
             >

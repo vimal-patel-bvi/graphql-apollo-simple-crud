@@ -1,36 +1,22 @@
 import { useMutation } from '@apollo/client';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { CREATE_A_POST } from '../graph-ql/mutations';
 
 export default function Create() {
     const [addFormVisible, setAddFormVisible] = useState(false);
-    const [createPost, { data, loading, error }] = useMutation(CREATE_A_POST);
-    const formRef = useRef(null);
-
-    useEffect(() => {
-        if (data) {
-            alert('Post created successfully');
-        }
-        if (error) {
-            alert(`Submission error! ${error.message}`);
-        }
-    }, [data, error])
+    const [createPost, { loading }] = useMutation(CREATE_A_POST);
 
     if (loading) return 'Submitting...';
 
     const toggleForm = () => {
         setAddFormVisible(!addFormVisible);
-        if (addFormVisible)
-            formRef.current.reset();
     }
-
     return (
         <div>
             <button onClick={toggleForm}>Add post</button>
             {
                 addFormVisible &&
                 <form
-                    ref={formRef}
                     id='create-form'
                     onSubmit={e => {
                         e.preventDefault();
@@ -41,8 +27,14 @@ export default function Create() {
                                     body: e.target.body.value
                                 }
                             }
+                        }).then(() => {
+                            e.target.reset();
+                            alert('Post created successfully');
+                            toggleForm();
+                        }).catch((error) => {
+                            alert(`Submission error! ${error.message}`);
                         });
-                        toggleForm();
+
                     }}
                 >
                     <input
